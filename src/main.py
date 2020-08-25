@@ -72,6 +72,98 @@ def handle_profile():
 
     return "Invalid Method", 404
 
+@app.route('/restaurant', methods=['POST', 'GET'])
+def handle_restaurant():
+    """
+    Create profile and retrieve all restaurants
+    """
+
+    # POST request
+    if request.method == 'POST':
+        body = request.get_json()
+
+        restaurant = Restaurant(
+          email=body['email'], 
+          name=body['name'], 
+          phone_number=body['phone_number'], 
+          address=body['address'], 
+          diet=body['diet'], 
+          website=body['website'], 
+          operational_hours=body['operation_hours'],
+          pricing=body['pricing']
+        )
+        db.session.add(restaurant)
+        db.session.commit()
+        return "ok", 200
+
+    # GET request
+    if request.method == 'GET':
+        all_restaurants = restaurant.query.all()
+        all_restaurants = list(map(lambda x: x.serialize(), all_restaurants))
+        return jsonify(all_restaurants), 200
+
+    return "Invalid Method", 404
+
+@app.route('/recipe', methods=['POST', 'GET'])
+def handle_recipe():
+    """
+    Create profile and retrieve all recipes
+    """
+
+    # POST request
+    if request.method == 'POST':
+        body = request.get_json()
+
+        recipe = Recipe(
+          profile_id=body['profile_id'], 
+          images=body['images'], 
+          video_recipe_link=body['video_recipe_link'], 
+          recipe_description=body['recipe_description'], 
+          public_recipes=body['public_recipes'], 
+        )
+        db.session.add(recipe)
+        db.session.commit()
+        return "ok", 200
+
+    # GET request
+    if request.method == 'GET':
+        all_recipes = Profile.query.all()
+        all_recipes = list(map(lambda x: x.serialize(), all_recipes))
+        return jsonify(all_recipes), 200
+
+    return "Invalid Method", 404
+
+@app.route('/review', methods=['POST', 'GET'])
+def handle_review():
+    """
+    Create profile and retrieve all reviews
+    """
+
+    # POST request
+    if request.method == 'POST':
+        body = request.get_json()
+
+        review = Review(
+          restaurant_id=body['restaurant_id'], 
+          profile_id=body['profile_id'], 
+          description=body['description'], 
+          rating=body['rating'], 
+          images=body['images'], 
+        )
+        db.session.add(review)
+        db.session.commit()
+        return "ok", 200
+
+    # GET request
+    if request.method == 'GET':
+        all_reviews = Review.query.all()
+        all_reviews = list(map(lambda x: x.serialize(), all_reviews))
+        return jsonify(all_recipes), 200
+
+    return "Invalid Method", 404
+
+
+
 @app.route('/user', methods=['GET'])
 def handle_hello():
 

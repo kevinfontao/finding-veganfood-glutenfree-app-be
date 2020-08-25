@@ -25,6 +25,7 @@ class Profile(db.Model):
     rewards = db.Column(db.String(120), unique=False, nullable=True)
     diet = db.Column(db.String(120),  nullable=False)
     user_avatar = db.Column(db.String(120),  nullable=True)
+    reviews = db.relationship('Review', backref='profile', lazy=True)
 
     def __repr__(self):
         return '<Profile %r>' % self.email
@@ -36,6 +37,9 @@ class Profile(db.Model):
             "name": self.name,
             "phone_number": self.phone_number,
             "diet": self.diet,
+            "rewards": self.rewards,
+            "user_avatar": self.user_avatar,
+            "reviews": list(map(lambda x: x.serialize(), self.reviews))
             
             # do not serialize the password, its a security breach
         }
@@ -60,6 +64,9 @@ class Restaurant(db.Model):
             "name": self.name,
             "phone_number": self.phone_number,
             "diet": self.diet,
+            "address": self.address,
+            "operational_hours": self.operational_hours,
+            "pricing": self.pricing
             
             # do not serialize the password, its a security breach
         }
@@ -97,6 +104,8 @@ class Review(db.Model):
     phone_number = db.Column(db.String(120),  nullable=False)
     operational_hours = db.Column(db.String(120),  nullable=True)
     pricing = db.Column(db.String(120),  nullable=True)
+    profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'),
+        nullable=False)
 
     def __repr__(self):
         return '<Profile %r>' % self.email
