@@ -8,7 +8,11 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Profile
+from models import db, User, Profile, Restaurant, Recipe, Review, Review_picture
+from flask import Flask, jsonify, request
+from flask_jwt_simple import (
+    JWTManager, jwt_required, create_jwt, get_jwt_identity
+)
 #from models import Person
 
 app = Flask(__name__)
@@ -19,6 +23,10 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
+# Setup the Flask-JWT-Simple extension
+app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
+jwt = JWTManager(app)
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -59,6 +67,7 @@ def handle_profile():
           rewards=body['rewards'], 
           diet=body['diet'], 
           user_avatar=body['user_avatar'], 
+          password=body['password']
         )
         db.session.add(profile)
         db.session.commit()
@@ -127,7 +136,7 @@ def handle_recipe():
 
     # GET request
     if request.method == 'GET':
-        all_recipes = Profile.query.all()
+        all_recipes = Recipe.query.all()
         all_recipes = list(map(lambda x: x.serialize(), all_recipes))
         return jsonify(all_recipes), 200
 
@@ -144,11 +153,12 @@ def handle_review():
         body = request.get_json()
 
         review = Review(
+          id=body['id'], 
           restaurant_id=body['restaurant_id'], 
-          profile_id=body['profile_id'], 
-          description=body['description'], 
-          rating=body['rating'], 
-          images=body['images'], 
+          profile_id=body['profile_id'],
+          description=body['description'],
+          rating=body['rating'],
+          pictures=body['pictures']
         )
         db.session.add(review)
         db.session.commit()
@@ -158,9 +168,54 @@ def handle_review():
     if request.method == 'GET':
         all_reviews = Review.query.all()
         all_reviews = list(map(lambda x: x.serialize(), all_reviews))
-        return jsonify(all_recipes), 200
+        return jsonify(all_reviews), 200
 
     return "Invalid Method", 404
+
+@app.route('/signup', methods=['POST'])
+def handle_signup():
+    imput_data = request.json
+    if 'email' in input_data and 'password' in input_data:
+        new_user = User(
+            input_data['email'],
+            input_data['password']
+        )
+        db.session.add(new_user)
+        try:
+            db.session.commit()
+            return jsonify(user, serialize()), 201
+        except Exception as error:
+            db.session.rollback()
+            return jsonify({
+                "msg": error
+            }), 500
+    else:
+        return jsonify({
+             "msg": "Check your keys..."
+        }), 400
+
+# Provide a method to create access tokens. The create_jwt()
+# function is used to actually generate the token
+@app.route('/login', methods=['POST'])
+def login():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    params = request.json
+    username = params.get('username', None)
+    password = params.get('password', None)
+
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+
+    if username != 'test' or password != 'test':
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    # Identity can be any data that is json serializable
+    ret = {'jwt': create_jwt(identity=username)}
+    return jsonify(ret), 200
 
 
 

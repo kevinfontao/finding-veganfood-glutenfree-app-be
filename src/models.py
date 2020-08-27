@@ -8,13 +8,19 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
 
+    def __inint__(self, email, password, is_active):
+        self.email = email
+        self.password = password
+        self.is_active = True
+
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.email
 
     def serialize(self):
         return {
             "id": self.id,
             "email": self.email,
+            "is_active": self.is_active
             # do not serialize the password, its a security breach
         }
 class Profile(db.Model):
@@ -24,6 +30,7 @@ class Profile(db.Model):
     phone_number = db.Column(db.String(120), unique=False, nullable=False)
     rewards = db.Column(db.String(120), unique=False, nullable=True)
     diet = db.Column(db.String(120),  nullable=False)
+    password = db.Column(db.String(120),  nullable=False)
     user_avatar = db.Column(db.String(120),  nullable=True)
     reviews = db.relationship('Review', backref='profile', lazy=True)
 
@@ -55,7 +62,7 @@ class Restaurant(db.Model):
     pricing = db.Column(db.String(120),  nullable=True)
 
     def __repr__(self):
-        return '<Profile %r>' % self.email
+        return '<Restaurant %r>' % self.email
 
     def serialize(self):
         return {
@@ -73,50 +80,44 @@ class Restaurant(db.Model):
 
 class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), unique=True, nullable=False)
+    profile_id = db.Column(db.String(120), unique=True, nullable=False)
     diet = db.Column(db.String(120), unique=False, nullable=False)
-    address = db.Column(db.String(120), unique=False, nullable=False)
-    email = db.Column(db.String(120), unique=False, nullable=True)
-    phone_number = db.Column(db.String(120),  nullable=False)
-    operational_hours = db.Column(db.String(120),  nullable=True)
-    pricing = db.Column(db.String(120),  nullable=True)
+    images = db.Column(db.String(120),  nullable=False)
+    recipe_video_link = db.Column(db.String(120),  nullable=True)
+    recipe_description = db.Column(db.String(120),  nullable=True)
 
     def __repr__(self):
-        return '<Profile %r>' % self.email
+        return '<Recipe %r>' % self.email
 
     def serialize(self):
         return {
             "id": self.id,
-            "email": self.email,
-            "name": self.name,
-            "phone_number": self.phone_number,
+            "profile_id": self.profile_id,
             "diet": self.diet,
+            "images": self.images,
+            "recipe_video_link": self.recipe_video_link,
+            "recipe_description": self.recipe_description
             
             # do not serialize the password, its a security breach
         }
 
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), unique=True, nullable=False)
-    diet = db.Column(db.String(120), unique=False, nullable=False)
-    address = db.Column(db.String(120), unique=False, nullable=False)
-    email = db.Column(db.String(120), unique=False, nullable=True)
-    phone_number = db.Column(db.String(120),  nullable=False)
-    operational_hours = db.Column(db.String(120),  nullable=True)
-    pricing = db.Column(db.String(120),  nullable=True)
+    description = db.Column(db.String(120), unique=False, nullable=False)
+    rating = db.Column(db.String(120), unique=False, nullable=True)
+    pictures = db.Column(db.String(120),  nullable=False)
     profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'),
         nullable=False)
 
     def __repr__(self):
-        return '<Profile %r>' % self.email
+        return '<Review %r>' % self.email
 
     def serialize(self):
         return {
             "id": self.id,
-            "email": self.email,
-            "name": self.name,
-            "phone_number": self.phone_number,
-            "diet": self.diet,
+            "description": self.description,
+            "rating": self.rating,
+            "pictures": self.pictures,
             
             # do not serialize the password, its a security breach
         }
@@ -127,15 +128,13 @@ class Review_picture(db.Model):
     review_id = db.Column(db.String(120), unique=False, nullable=False)
 
     def __repr__(self):
-        return '<Profile %r>' % self.email
+        return '<Review_picture %r>' % self.email
 
     def serialize(self):
         return {
             "id": self.id,
-            "email": self.image_url,
-            "name": self.review_id,
-            "phone_number": self.phone_number,
-            "diet": self.diet,
+            "image_url": self.image_url,
+            "review_id": self.review_id,
             
             # do not serialize the password, its a security breach
         }
