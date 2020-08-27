@@ -202,19 +202,20 @@ def login():
         return jsonify({"msg": "Missing JSON in request"}), 400
 
     params = request.json
-    username = params.get('username', None)
+    email = params.get('email', None)
     password = params.get('password', None)
 
-    if not username:
-        return jsonify({"msg": "Missing username parameter"}), 400
+    if not email:
+        return jsonify({"msg": "Missing email parameter"}), 400
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
-    if username != 'test' or password != 'test':
+    usercheck = Profile.query.filter_by(email=email, password=password).first()
+    if usercheck == None:
         return jsonify({"msg": "Bad username or password"}), 401
 
     # Identity can be any data that is json serializable
-    ret = {'jwt': create_jwt(identity=username)}
+    ret = {'jwt': create_jwt(identity=email)}
     return jsonify(ret), 200
 
 

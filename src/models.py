@@ -44,6 +44,7 @@ class Profile(db.Model):
             "name": self.name,
             "phone_number": self.phone_number,
             "diet": self.diet,
+            "password": self.password,
             "rewards": self.rewards,
             "user_avatar": self.user_avatar,
             "reviews": list(map(lambda x: x.serialize(), self.reviews))
