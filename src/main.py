@@ -96,9 +96,8 @@ def handle_restaurant():
           name=body['name'], 
           phone_number=body['phone_number'], 
           address=body['address'], 
-          diet=body['diet'], 
-          website=body['website'], 
-          operational_hours=body['operation_hours'],
+          diet=body['diet'],
+          operational_hours=body['operational_hours'],
           pricing=body['pricing']
         )
         db.session.add(restaurant)
@@ -107,7 +106,7 @@ def handle_restaurant():
 
     # GET request
     if request.method == 'GET':
-        all_restaurants = restaurant.query.all()
+        all_restaurants = Restaurant.query.all()
         all_restaurants = list(map(lambda x: x.serialize(), all_restaurants))
         return jsonify(all_restaurants), 200
 
@@ -126,9 +125,10 @@ def handle_recipe():
         recipe = Recipe(
           profile_id=body['profile_id'], 
           images=body['images'], 
+          diet=body['diet'],
           video_recipe_link=body['video_recipe_link'], 
-          recipe_description=body['recipe_description'], 
-          public_recipes=body['public_recipes'], 
+          recipe_ingredients=body['recipe_ingredients'],
+          recipe_description=body['recipe_description']
         )
         db.session.add(recipe)
         db.session.commit()
@@ -183,7 +183,7 @@ def handle_signup():
         db.session.add(new_user)
         try:
             db.session.commit()
-            return jsonify(user, serialize()), 201
+            return jsonify(new_user.serialize()), 201
         except Exception as error:
             db.session.rollback()
             return jsonify({
@@ -210,9 +210,52 @@ def login():
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
+    specific_user = User.query.filter_by(
+        email=email
+    ).one_or_none()
+    if isinstance(specific_user, User):
+        if specific_user.password == password:
+            # this person is who it claims to be!
+            # Identity can be any data that is json serializable
+            response = {'jwt': create_jwt(identity=specific_user.id)}
+            return jsonify(response), 200
+
+
+        else:
+            return jsonify({
+            "msg": "bad credentials"
+        })
+    else:
+        return jsonify({
+            "msg": "bad credentials"
+        })
     usercheck = Profile.query.filter_by(email=email, password=password).first()
     if usercheck == None:
-        return jsonify({"msg": "Bad username or password"}), 401
+        return jsonify({"msg": "Bad email or password"}), 400
+
+    # Protect a view with jwt_required, which requires a valid jwt
+    # to be present in the headers.
+@app.route('/protected', methods=['GET'])
+@jwt_required
+def protected():
+    # Access the identity of the current user with get_jwt_identity
+    specific_user_id = get_jwt_identity()
+    specific_user = User.query.filter_by(
+        id=specific_user_id
+    ).one_or_none()
+
+    if specific_user is None: 
+        return jsonsify ({
+            "msg": "user not found"
+        }), 404
+    else: 
+        return jsonify({
+            "msg": "Yay! You sent the token correctly!",
+            "user_data": specific_user.serialize()
+        }), 200
+    
+
+    # return jsonify({'hello_from': get_jwt_identity()}), 200
 
     # Identity can be any data that is json serializable
     ret = {'jwt': create_jwt(identity=email)}

@@ -8,7 +8,7 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
 
-    def __inint__(self, email, password, is_active):
+    def __inint__(self, email, password):
         self.email = email
         self.password = password
         self.is_active = True
@@ -61,6 +61,7 @@ class Restaurant(db.Model):
     phone_number = db.Column(db.String(120),  nullable=False)
     operational_hours = db.Column(db.String(120),  nullable=True)
     pricing = db.Column(db.String(120),  nullable=True)
+    reviews = db.relationship('Review', backref='restaurant', lazy=True)
 
     def __repr__(self):
         return '<Restaurant %r>' % self.email
@@ -74,7 +75,8 @@ class Restaurant(db.Model):
             "diet": self.diet,
             "address": self.address,
             "operational_hours": self.operational_hours,
-            "pricing": self.pricing
+            "pricing": self.pricing,
+            "reviews": list(map(lambda x: x.serialize(), self.reviews))
             
             # do not serialize the password, its a security breach
         }
@@ -83,8 +85,9 @@ class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     profile_id = db.Column(db.String(120), unique=True, nullable=False)
     diet = db.Column(db.String(120), unique=False, nullable=False)
+    recipe_ingredients = db.Column(db.String(120), unique=False, nullable=False)
     images = db.Column(db.String(120),  nullable=False)
-    recipe_video_link = db.Column(db.String(120),  nullable=True)
+    video_recipe_link = db.Column(db.String(120),  nullable=True)
     recipe_description = db.Column(db.String(120),  nullable=True)
 
     def __repr__(self):
@@ -95,8 +98,9 @@ class Recipe(db.Model):
             "id": self.id,
             "profile_id": self.profile_id,
             "diet": self.diet,
+            "recipe_ingredients": self.recipe_ingredients,
             "images": self.images,
-            "recipe_video_link": self.recipe_video_link,
+            "video_recipe_link": self.video_recipe_link,
             "recipe_description": self.recipe_description
             
             # do not serialize the password, its a security breach
@@ -108,6 +112,8 @@ class Review(db.Model):
     rating = db.Column(db.String(120), unique=False, nullable=True)
     pictures = db.Column(db.String(120),  nullable=False)
     profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'),
+        nullable=False)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'),
         nullable=False)
 
     def __repr__(self):
