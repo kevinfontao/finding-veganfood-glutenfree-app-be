@@ -52,19 +52,10 @@ def handle_profile():
     if request.method == 'POST':
         body = request.get_json()
 
-        # if body is None:
-        #     raise APIException("You need to specify the request body as a json object", status_code=400)
-        
-        # if 'email' not in body:
-        #     raise APIException('You need to specify the email', status_code=400)
-        # if 'password' not in body:
-        #     raise APIException('You need to specify the password', status_code=400)    
-
         profile = Profile(
           email=body['email'], 
           name=body['name'], 
           phone_number=body['phone_number'], 
-          rewards=body['rewards'], 
           diet=body['diet'], 
           user_avatar=body['user_avatar'], 
           password=body['password']
@@ -210,11 +201,11 @@ def login():
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
-    specific_user = User.query.filter_by(
+    specific_user = Profile.query.filter_by(
         email=email
     ).one_or_none()
-    if isinstance(specific_user, User):
-        if specific_user.password == password:
+    if isinstance(specific_user, Profile):
+        if specific_user.check_password(password):
             # this person is who it claims to be!
             # Identity can be any data that is json serializable
             response = {'jwt': create_jwt(identity=specific_user.id)}
@@ -224,11 +215,11 @@ def login():
         else:
             return jsonify({
             "msg": "bad credentials"
-        })
+        }), 400
     else:
         return jsonify({
             "msg": "bad credentials"
-        })
+        }), 400
     usercheck = Profile.query.filter_by(email=email, password=password).first()
     if usercheck == None:
         return jsonify({"msg": "Bad email or password"}), 400

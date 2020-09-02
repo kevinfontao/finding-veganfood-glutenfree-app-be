@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 143cf780d80e
+Revision ID: bbf682e7b343
 Revises: 
-Create Date: 2020-09-01 00:45:30.852690
+Create Date: 2020-09-02 00:28:46.808008
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '143cf780d80e'
+revision = 'bbf682e7b343'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,8 +24,9 @@ def upgrade():
     sa.Column('name', sa.String(length=120), nullable=False),
     sa.Column('phone_number', sa.String(length=120), nullable=False),
     sa.Column('rewards', sa.String(length=120), nullable=True),
+    sa.Column('password_hash', sa.String(length=250), nullable=False),
+    sa.Column('user_salt', sa.String(length=120), nullable=False),
     sa.Column('diet', sa.String(length=120), nullable=False),
-    sa.Column('password', sa.String(length=120), nullable=False),
     sa.Column('user_avatar', sa.String(length=120), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
@@ -36,7 +37,7 @@ def upgrade():
     sa.Column('diet', sa.String(length=120), nullable=False),
     sa.Column('recipe_ingredients', sa.String(length=120), nullable=False),
     sa.Column('images', sa.String(length=120), nullable=False),
-    sa.Column('recipe_video_link', sa.String(length=120), nullable=True),
+    sa.Column('video_recipe_link', sa.String(length=120), nullable=True),
     sa.Column('recipe_description', sa.String(length=120), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('profile_id')

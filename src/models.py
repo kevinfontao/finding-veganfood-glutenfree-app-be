@@ -1,4 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+import os 
+from base64 import b64encode
+
 
 db = SQLAlchemy()
 
@@ -12,6 +16,7 @@ class User(db.Model):
         self.email = email
         self.password = password
         self.is_active = True
+        
 
     def __repr__(self):
         return '<User %r>' % self.email
@@ -29,10 +34,29 @@ class Profile(db.Model):
     name = db.Column(db.String(120), unique=False, nullable=False)
     phone_number = db.Column(db.String(120), unique=False, nullable=False)
     rewards = db.Column(db.String(120), unique=False, nullable=True)
+    password_hash = db.Column(db.String(250), nullable=False)
+    user_salt = db.Column(db.String(120), nullable=False)
     diet = db.Column(db.String(120),  nullable=False)
-    password = db.Column(db.String(120),  nullable=False)
     user_avatar = db.Column(db.String(120),  nullable=True)
     reviews = db.relationship('Review', backref='profile', lazy=True)
+
+    def __init__(self, email, name, password, phone_number, diet, user_avatar):
+        self.email = email
+        self.user_salt = b64encode(os.urandom(32)).decode("utf-8")
+        self.set_password(password)
+        self.name = name
+        self.diet = diet
+        self.phone_number = phone_number
+        self.user_avatar = user_avatar
+
+    def set_password(self, password):
+        """ hashes paassword and salt for user and assings to user.hash_password """
+        self.password_hash = generate_password_hash(f"{password}{self.user_salt}")
+
+    def check_password(self, password):
+        """ verifies current hash_password against new password + salt hash """
+        return check_password_hash(self.password_hash, f"{password}{self.user_salt}")
+
 
     def __repr__(self):
         return '<Profile %r>' % self.email
@@ -44,7 +68,6 @@ class Profile(db.Model):
             "name": self.name,
             "phone_number": self.phone_number,
             "diet": self.diet,
-            "password": self.password,
             "rewards": self.rewards,
             "user_avatar": self.user_avatar,
             "reviews": list(map(lambda x: x.serialize(), self.reviews))
