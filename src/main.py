@@ -104,22 +104,23 @@ def handle_restaurant():
     return "Invalid Method", 404
 
 @app.route('/recipe', methods=['POST', 'GET'])
+@jwt_required
 def handle_recipe():
     """
     Create profile and retrieve all recipes
     """
-
+    profile_id=get_jwt_identity()
     # POST request
     if request.method == 'POST':
         body = request.get_json()
 
-        recipe = Recipe(
-          profile_id=body['profile_id'], 
-          images=body['images'], 
-          diet=body['diet'],
-          video_recipe_link=body['video_recipe_link'], 
-          recipe_ingredients=body['recipe_ingredients'],
-          recipe_description=body['recipe_description']
+        recipe = Recipe( 
+            profile_id=profile_id,  
+            images=body['images'], 
+            diet=body['diet'],
+            video_recipe_link=body['video_recipe_link'], 
+            recipe_ingredients=body['recipe_ingredients'],
+            recipe_description=body['recipe_description']
         )
         db.session.add(recipe)
         db.session.commit()
