@@ -85,6 +85,7 @@ class Restaurant(db.Model):
     phone_number = db.Column(db.String(120),  nullable=False)
     operational_hours = db.Column(db.String(120),  nullable=True)
     pricing = db.Column(db.String(120),  nullable=True)
+    images = db.Column(db.String(120),  nullable=False)
     reviews = db.relationship('Review', backref='restaurant', lazy=True)
 
     def __repr__(self):
@@ -100,6 +101,7 @@ class Restaurant(db.Model):
             "address": self.address,
             "operational_hours": self.operational_hours,
             "pricing": self.pricing,
+            "images": self.images,
             "reviews": list(map(lambda x: x.serialize(), self.reviews))
             
             # do not serialize the password, its a security breach

@@ -89,7 +89,8 @@ def handle_restaurant():
           address=body['address'], 
           diet=body['diet'],
           operational_hours=body['operational_hours'],
-          pricing=body['pricing']
+          pricing=body['pricing'],
+          images=body['images']
         )
         db.session.add(restaurant)
         db.session.commit()
