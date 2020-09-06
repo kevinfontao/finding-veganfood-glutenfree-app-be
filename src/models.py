@@ -112,9 +112,9 @@ class Recipe(db.Model):
     profile_id = db.Column(db.Integer, db.ForeignKey("profile.id"), nullable=False)
     diet = db.Column(db.String(120), unique=False, nullable=False)
     recipe_ingredients = db.Column(db.String(120), unique=False, nullable=False)
-    images = db.Column(db.String(120),  nullable=False)
-    video_recipe_link = db.Column(db.String(120),  nullable=True)
-    recipe_description = db.Column(db.String(120),  nullable=True)
+    images = db.Column(db.String(400),  nullable=False)
+    video_recipe_link = db.Column(db.String(400),  nullable=True)
+    recipe_description = db.Column(db.String(400),  nullable=True)
 
     def __repr__(self):
         return '<Recipe %r>' % self.email
