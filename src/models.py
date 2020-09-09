@@ -71,7 +71,8 @@ class Profile(db.Model):
             "diet": self.diet,
             "rewards": self.rewards,
             "user_avatar": self.user_avatar,
-            "reviews": list(map(lambda x: x.serialize(), self.reviews))
+            "reviews": list(map(lambda x: x.serialize(), self.reviews)),
+            "recipes": list(map(lambda x: x.serialize(), self.recipes))
             
             # do not serialize the password, its a security breach
         }
